@@ -15,10 +15,10 @@ import io.github.linwancen.plugin.show.bean.LineInfo;
 import io.github.linwancen.plugin.show.ext.conf.ConfCache;
 import io.github.linwancen.plugin.show.lang.base.BaseLangDoc;
 import io.github.linwancen.plugin.show.lang.base.DocSkip;
+import io.github.linwancen.util.SqlCompatible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Set;
@@ -45,22 +45,9 @@ public class SqlLangDoc extends BaseLangDoc {
     protected @Nullable String refElementDoc(@NotNull LineInfo info,
                                              @NotNull PsiElement ref) {
         JBIterable<DbElement> relatedDbElements;
-        Class<?> clazz;
         try {
-            // new version new Class
-            clazz = Class.forName("com.intellij.sql.SqlNavigationUtils");
-        } catch (Throwable e) {
-            try {
-                // old version
-                clazz = Class.forName("com.intellij.sql.SqlDocumentationProvider");
-            } catch (Throwable e2) {
-                return null;
-            }
-        }
-        try {
-            @NotNull Method method = clazz.getMethod("findRelatedDbElements", PsiElement.class, boolean.class);
             //noinspection unchecked
-            relatedDbElements = (JBIterable<DbElement>) method.invoke(null, ref, false);
+            relatedDbElements = (JBIterable<DbElement>) SqlCompatible.findRelatedDbElements.invoke(null, ref, false);
         } catch (Throwable e) {
             return null;
         }
