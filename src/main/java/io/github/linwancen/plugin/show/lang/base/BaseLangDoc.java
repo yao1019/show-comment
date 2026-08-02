@@ -158,6 +158,9 @@ public abstract class BaseLangDoc extends EditorLinePainter {
      */
     @Nullable
     protected String refDoc(@NotNull LineInfo info, @NotNull PsiElement ref) {
+        if (info.isDumb()) {
+            return null;
+        }
         // kotlin ref.getReference() == null but ref.getReferences().length == 2
         @NotNull PsiReference[] references = ref.getReferences();
         if (references.length < 1) {
@@ -166,6 +169,9 @@ public abstract class BaseLangDoc extends EditorLinePainter {
         for (@NotNull PsiReference reference : references) {
             @Nullable PsiElement resolve;
             try {
+                if (info.isDumb()) {
+                    return null;
+                }
                 resolve = reference.resolve();
             } catch (Throwable e) {
                 // 2021.3: Slow operations are prohibited on EDT.
