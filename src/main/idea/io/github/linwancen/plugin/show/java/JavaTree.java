@@ -1,6 +1,7 @@
 package io.github.linwancen.plugin.show.java;
 
 import com.intellij.ide.projectView.ProjectViewNode;
+import com.intellij.ide.projectView.impl.nodes.PackageElement;
 import com.intellij.ide.projectView.impl.nodes.PackageElementNode;
 import com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode;
 import com.intellij.ide.projectView.impl.nodes.PsiFieldNode;
@@ -56,25 +57,32 @@ public class JavaTree {
                                                           @NotNull Project project) {
         if (node instanceof PsiDirectoryNode) {
             PsiDirectory psiDirectory = ((PsiDirectoryNode) node).getValue();
-            return dirDoc(psiDirectory);
+            if (psiDirectory != null) {
+                return dirDoc(psiDirectory);
+            }
         }
 
         if (node instanceof PsiFieldNode) {
             // On Show Members
             PsiField psiField = ((PsiFieldNode) node).getValue();
-            // for @Autowire Bean
-            @NotNull PsiType type = psiField.getType();
-            if (type instanceof PsiClassReferenceType) {
-                @NotNull PsiClassReferenceType psiClassReferenceType = (PsiClassReferenceType) type;
-                @NotNull PsiJavaCodeReferenceElement reference = psiClassReferenceType.getReference();
-                return NewCallRefToPsiDoc.javaCodeDoc(info, reference);
+            if (psiField != null) {
+                // for @Autowire Bean
+                @NotNull PsiType type = psiField.getType();
+                if (type instanceof PsiClassReferenceType) {
+                    @NotNull PsiClassReferenceType psiClassReferenceType = (PsiClassReferenceType) type;
+                    @NotNull PsiJavaCodeReferenceElement reference = psiClassReferenceType.getReference();
+                    return NewCallRefToPsiDoc.javaCodeDoc(info, reference);
+                }
             }
         }
 
         if (node instanceof PackageElementNode) {
             // On Packages View
-            @NotNull PsiPackage psiPackage = ((PackageElementNode) node).getValue().getPackage();
-            return OwnerToPsiDocUtils.packageDoc(psiPackage);
+            PackageElement packageElement = ((PackageElementNode) node).getValue();
+            if (packageElement != null) {
+                @NotNull PsiPackage psiPackage = packageElement.getPackage();
+                return OwnerToPsiDocUtils.packageDoc(psiPackage);
+            }
         }
 
         // On Packages View, Project Files View
