@@ -38,6 +38,19 @@ public class FileInfo extends SettingsInfo {
         return new FileInfo(file, document, project, FuncEnum.LINE);
     }
 
+    /**
+     * Lock-free variant for the paint path (EditorLinePainter):
+     * the R/W lock is disallowed during paint since 2025.x,
+     * so only the already loaded cached Document may be used there.
+     */
+    public static @Nullable FileInfo ofCached(@NotNull VirtualFile file, @NotNull Project project) {
+        @Nullable Document document = FileDocumentManager.getInstance().getCachedDocument(file);
+        if (document == null) {
+            return null;
+        }
+        return new FileInfo(file, document, project, FuncEnum.LINE);
+    }
+
     public static @Nullable FileInfo of(@NotNull AnActionEvent event) {
         @Nullable PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
         if (psiFile == null) {
